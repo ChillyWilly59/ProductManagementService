@@ -5,15 +5,16 @@
         Create New Product
     </button>
 </p>
-<table class="table">
+
+<div class="form-group">
+    <input type="text" id="filterInput" class="form-control" placeholder="Filter by product name" onkeyup="filterProducts()">
+</div>
+
+<table id="productTable" class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
+            <th>Name</th>
+            <th>Description</th>
             <th></th>
         </tr>
     </thead>
@@ -21,17 +22,12 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td id="productName_@item.Id">
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td id="productDescription_@item.Id">
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.Description)</td>
                 <td>
                     <button type="button" class="btn btn-primary" onclick="openEditModal('@item.Id', '@item.Name', '@item.Description')">Edit</button>
                     <button type="button" class="btn btn-danger" onclick="deleteProduct('@item.Id')">Delete</button>
                 </td>
-
             </tr>
         }
     </tbody>
@@ -100,7 +96,6 @@
     function openCreateModal() {
         $("#addProductModal").modal("show");
     }
-
     function addProduct() {
         var productName = $("#productName").val();
         var productDescription = $("#productDescription").val();
@@ -110,10 +105,8 @@
             data: { name: productName, description: productDescription },
             dataType: "json",
             success: function (data) {
-                $.get("/Products/Index", function (response) {
-                    $("#productList").html(response);
-                });
                 $("#addProductModal").modal("hide");
+                location.reload();
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 console.error("Failed to add product:", errorThrown);
@@ -158,9 +151,6 @@
                 dataType: "json",
                 success: function (data) {
                     $("#productRow_" + productId).remove();
-                    $.get("/Products/Index", function (response) {
-                        $("#productList").html(response);
-                    });
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.error("Failed to delete product:", errorThrown);
@@ -169,5 +159,22 @@
             });
         }
     }
-
+    function filterProducts() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("filterInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("productTable");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
 </script>

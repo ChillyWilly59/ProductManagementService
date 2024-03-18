@@ -18,11 +18,19 @@ namespace ProductManagementService.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            var products = await _context.Products.ToListAsync();
-            return View(products);
+            var products = from p in _context.Products
+                           select p;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                products = products.Where(p => p.Name.Contains(searchString));
+            }
+
+            return View(await products.ToListAsync());
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Create(string name, string description)
